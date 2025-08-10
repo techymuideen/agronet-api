@@ -1,0 +1,8 @@
+services:
+  db:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGODB_DATABASE: agronet
