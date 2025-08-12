@@ -14,13 +14,17 @@ import { GeolocationModule } from './geolocation/geolocation.module';
 
 @Module({
   imports: [
-    // Make MongoDB connection optional for development
+    // MongoDB connection configuration
     MongooseModule.forRootAsync({
       useFactory: () => ({
         uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/agronet',
-        // Gracefully handle connection errors
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 45000,
+        // Connection options for MongoDB Atlas
+        serverSelectionTimeoutMS: 10000, // 10 seconds
+        socketTimeoutMS: 45000, // 45 seconds
+        // Additional options for better performance
+        maxPoolSize: 10, // Maintain up to 10 socket connections
+        minPoolSize: 5, // Maintain a minimum of 5 socket connections
+        maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
       }),
     }),
     AuthModule,

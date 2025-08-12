@@ -1,98 +1,221 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# AgroNet API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A comprehensive backend API for the AgroNet agricultural marketplace platform built with NestJS, MongoDB Atlas, and TypeScript.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **User Management**: Registration, authentication, and profile management
+- **Product Management**: CRUD operations for agricultural products
+- **Order Processing**: Complete order lifecycle management
+- **Messaging System**: Communication between buyers and farmers
+- **Review System**: Product reviews and ratings
+- **Geolocation Services**: Location-based services for farmers and buyers
+- **Admin Panel**: Administrative controls and monitoring
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Tech Stack
 
-## Project setup
+- **Framework**: NestJS (Node.js)
+- **Database**: MongoDB Atlas
+- **Language**: TypeScript
+- **Authentication**: JWT
+- **Validation**: Class Validator
+- **Testing**: Jest
 
-```bash
-$ npm install
+## Quick Start
+
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+- MongoDB Atlas account
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/techymuideen/agronet-api.git
+   cd agronet-api
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   ```
+   Update the `.env` file with your MongoDB Atlas connection string and other configurations.
+
+4. **Start the development server:**
+   ```bash
+   npm run start:dev
+   ```
+
+The API will be available at `http://localhost:3001`
+
+## Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+# Database Configuration
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/agronet?retryWrites=true&w=majority
+
+# Application Configuration
+PORT=3001
+NODE_ENV=development
+
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key
+
+# CORS Origins (comma-separated)
+CORS_ORIGINS=http://localhost:3000,http://localhost:3001
 ```
 
-## Compile and run the project
+## API Endpoints
 
-```bash
-# development
-$ npm run start
+### Health Check
+- `GET /` - API status
+- `GET /health` - Detailed health information
 
-# watch mode
-$ npm run start:dev
+### User Management
+- `POST /user` - Create new user
+- `GET /user/:id` - Get user by ID
+- `PUT /user/:id` - Update user
+- `DELETE /user/:id` - Delete user
 
-# production mode
-$ npm run start:prod
+### Authentication
+- `POST /auth/login` - User login
+- `POST /auth/register` - User registration
+- `POST /auth/refresh` - Refresh JWT token
+
+### Products
+- `GET /product` - List all products
+- `POST /product` - Create new product
+- `GET /product/:id` - Get product by ID
+- `PUT /product/:id` - Update product
+- `DELETE /product/:id` - Delete product
+
+### Orders
+- `GET /order` - List orders
+- `POST /order` - Create new order
+- `GET /order/:id` - Get order by ID
+- `PUT /order/:id` - Update order status
+
+### Reviews
+- `GET /review` - List reviews
+- `POST /review` - Create review
+- `GET /review/product/:productId` - Get reviews for product
+
+### Messages
+- `GET /message` - List messages
+- `POST /message` - Send message
+- `GET /message/thread/:threadId` - Get message thread
+
+## Project Structure
+
+```
+src/
+├── admin/              # Admin module
+├── auth/               # Authentication module
+├── farmer-application/ # Farmer application module
+├── geolocation/        # Geolocation services
+├── message/           # Messaging system
+├── order/             # Order management
+├── product/           # Product management
+├── review/            # Review system
+├── users/             # User management
+├── app.module.ts      # Main application module
+├── app.controller.ts  # Root controller
+├── app.service.ts     # Root service
+└── main.ts           # Application entry point
 ```
 
-## Run tests
+## Scripts
 
 ```bash
-# unit tests
-$ npm run test
+# Development
+npm run start:dev      # Start development server with hot reload
+npm run start:debug    # Start with debugging enabled
 
-# e2e tests
-$ npm run test:e2e
+# Production
+npm run build          # Build the application
+npm run start:prod     # Start production server
 
-# test coverage
-$ npm run test:cov
+# Testing
+npm run test           # Run unit tests
+npm run test:watch     # Run tests in watch mode
+npm run test:cov       # Run tests with coverage
+npm run test:e2e       # Run end-to-end tests
+
+# Code Quality
+npm run lint           # Run ESLint
+npm run format         # Format code with Prettier
 ```
+
+## Database Schema
+
+The application uses MongoDB with Mongoose schemas for the following entities:
+
+- **Users**: User accounts (buyers, farmers, admins)
+- **Products**: Agricultural products
+- **Orders**: Order transactions
+- **Reviews**: Product reviews and ratings
+- **Messages**: Communication threads
+- **Farmer Applications**: Applications to become verified farmers
+
+## Error Handling
+
+The API implements comprehensive error handling:
+
+- **ConflictException**: For duplicate resources (e.g., email already exists)
+- **ValidationPipe**: For request validation
+- **Global Exception Filter**: For unhandled errors
+- **MongoDB Error Handling**: For database-specific errors
+
+## Security Features
+
+- **JWT Authentication**: Secure token-based authentication
+- **Password Hashing**: Using bcryptjs
+- **Input Validation**: Class-validator for request validation
+- **CORS Configuration**: Configurable cross-origin resource sharing
+- **Environment Variables**: Secure configuration management
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed deployment instructions for Render and other platforms.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Quick Deploy to Render
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+1. Push your code to GitHub
+2. Connect your repository to Render
+3. Set environment variables
+4. Deploy!
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Your API will be live at: `https://your-service-name.onrender.com`
 
-## Resources
+## Contributing
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new features
+5. Submit a pull request
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For support and questions:
+- Create an issue in the GitHub repository
+- Contact the development team
+- Check the documentation
+
+## Acknowledgments
+
+- Built with [NestJS](https://nestjs.com/)
+- Database hosted on [MongoDB Atlas](https://www.mongodb.com/atlas)
+- Deployed on [Render](https://render.com/)
