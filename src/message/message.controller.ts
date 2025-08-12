@@ -16,6 +16,7 @@ import {
   CreateThreadDto,
 } from './message.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ApiResponse } from '../common/interfaces/api-response.interface';
 
 @Controller('message')
 @UseGuards(JwtAuthGuard)
@@ -58,7 +59,22 @@ export class MessageController {
     @Request() req,
     @Body() createMessageDto: CreateMessageDto,
   ) {
-    return this.messageService.createMessage(req.user.userId, createMessageDto);
+    try {
+      const message = await this.messageService.createMessage(
+        req.user.userId,
+        createMessageDto,
+      );
+      return {
+        success: true,
+        data: message,
+        message: 'Message sent successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Failed to send message',
+      };
+    }
   }
 
   @Get(':id')

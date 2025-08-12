@@ -13,14 +13,13 @@ import { UserService } from '../users/user.service';
 
 export interface CreateFarmerApplicationDto {
   userId: string;
-  businessName: string;
-  businessAddress: string;
-  businessPhone: string;
-  businessEmail: string;
-  businessDescription: string;
-  certifications?: string;
-  experience?: string;
-  products?: string;
+  farmName: string;
+  farmLocation: string;
+  farmSize: string;
+  cropsGrown: string[];
+  experience: number;
+  contactPhone: string;
+  description: string;
 }
 
 @Injectable()
@@ -33,47 +32,33 @@ export class FarmerApplicationService {
 
   async create(
     createFarmerApplicationDto: CreateFarmerApplicationDto,
-  ): Promise<{ success: boolean; data?: FarmerApplication; error?: string }> {
-    try {
-      // Check if user already has a pending application
-      const existingApplication = await this.farmerApplicationModel.findOne({
-        userId: new Types.ObjectId(createFarmerApplicationDto.userId),
-        status: { $in: ['pending', 'approved'] },
-      });
+  ): Promise<FarmerApplication> {
+    // Check if user already has a pending application
+    const existingApplication = await this.farmerApplicationModel.findOne({
+      userId: new Types.ObjectId(createFarmerApplicationDto.userId),
+      status: { $in: ['pending', 'approved'] },
+    });
 
-      if (existingApplication) {
-        if (existingApplication.status === 'approved') {
-          return {
-            success: false,
-            error: 'You are already an approved farmer.',
-          };
-        }
-        return {
-          success: false,
-          error: 'You already have a pending application.',
-        };
+    if (existingApplication) {
+      if (existingApplication.status === 'approved') {
+        throw new ConflictException('You are already an approved farmer.');
       }
-
-      const farmerApplication = new this.farmerApplicationModel({
-        ...createFarmerApplicationDto,
-        userId: new Types.ObjectId(createFarmerApplicationDto.userId),
-      });
-
-      const savedApplication = await farmerApplication.save();
-
-      return {
-        success: true,
-        data: savedApplication,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Failed to create application',
-      };
+      throw new ConflictException('You already have a pending application.');
     }
+
+    const farmerApplication = new this.farmerApplicationModel({
+      ...createFarmerApplicationDto,
+      userId: new Types.ObjectId(createFarmerApplicationDto.userId),
+    });
+
+    const savedApplication = await farmerApplication.save();
+
+    // Update the user's farmerApplicationStatus to 'pending'
+    await this.userService.updateUser(createFarmerApplicationDto.userId, {
+      farmerApplicationStatus: 'pending',
+    });
+
+    return savedApplication;
   }
 
   async findAll(): Promise<FarmerApplication[]> {
@@ -124,33 +109,48 @@ export class FarmerApplicationService {
     id: string,
     status: 'pending' | 'approved' | 'rejected',
   ): Promise<FarmerApplication> {
+    // First, get the application to get the userId
+    const application = await this.farmerApplicationModel
+      .findById(id)
+      .populate('userId', 'firstname lastname email')
+      .exec();
+
+    if (!application) {
+      throw new NotFoundException('Farmer application not found');
+    }
+
+    // Update the application status
     const updatedApplication = await this.farmerApplicationModel
       .findByIdAndUpdate(id, { status }, { new: true })
       .populate('userId', 'firstname lastname email')
       .exec();
 
-    if (!updatedApplication) {
-      throw new NotFoundException('Farmer application not found');
+    // Update the user's role and farmerApplicationStatus based on the status
+    if (status === 'approved') {
+      await this.userService.updateUser(
+        (application.userId as any)._id.toString(),
+        {
+          role: 'farmer',
+          farmerApplicationStatus: 'approved',
+        },
+      );
+    } else if (status === 'rejected') {
+      await this.userService.updateUser(
+        (application.userId as any)._id.toString(),
+        {
+          farmerApplicationStatus: 'rejected',
+        },
+      );
+    } else if (status === 'pending') {
+      await this.userService.updateUser(
+        (application.userId as any)._id.toString(),
+        {
+          farmerApplicationStatus: 'pending',
+        },
+      );
     }
 
-    // If approving the application, update the user's role to farmer
-    if (status === 'approved' && updatedApplication.userId) {
-      const userId =
-        typeof updatedApplication.userId === 'string'
-          ? updatedApplication.userId
-          : (updatedApplication.userId as any)._id?.toString();
-
-      if (userId) {
-        try {
-          await this.userService.updateUserRole(userId, 'farmer');
-        } catch (error) {
-          console.error('Failed to update user role:', error);
-          // Don't throw error here as the application was still updated
-        }
-      }
-    }
-
-    return updatedApplication;
+    return updatedApplication!;
   }
 
   async remove(id: string): Promise<void> {

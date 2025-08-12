@@ -9,28 +9,25 @@ export class FarmerApplication {
   userId: Types.ObjectId;
 
   @Prop({ required: true })
-  businessName: string;
+  farmName: string;
 
   @Prop({ required: true })
-  businessAddress: string;
+  farmLocation: string;
 
   @Prop({ required: true })
-  businessPhone: string;
+  farmSize: string;
+
+  @Prop({ type: [String], required: true })
+  cropsGrown: string[];
 
   @Prop({ required: true })
-  businessEmail: string;
+  experience: number;
 
   @Prop({ required: true })
-  businessDescription: string;
+  contactPhone: string;
 
-  @Prop()
-  certifications?: string;
-
-  @Prop()
-  experience?: string;
-
-  @Prop()
-  products?: string;
+  @Prop({ required: true })
+  description: string;
 
   @Prop({ enum: ['pending', 'approved', 'rejected'], default: 'pending' })
   status: 'pending' | 'approved' | 'rejected';

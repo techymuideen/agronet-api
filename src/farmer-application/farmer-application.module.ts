@@ -3,11 +3,12 @@ import { FarmerApplicationService } from './farmer-application.service';
 import { FarmerApplicationController } from './farmer-application.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
-import { UserModule } from '../users/user.module';
 import {
   FarmerApplication,
   FarmerApplicationSchema,
 } from './entities/farmer-application.entity';
+import { UserService } from '../users/user.service';
+import { User, UserSchema } from '../users/entities/user.entity';
 
 @Module({
   imports: [
@@ -16,14 +17,17 @@ import {
         name: FarmerApplication.name,
         schema: FarmerApplicationSchema,
       },
+      {
+        name: User.name,
+        schema: UserSchema,
+      },
     ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'your-secret-key',
       signOptions: { expiresIn: '7d' },
     }),
-    UserModule,
   ],
-  providers: [FarmerApplicationService],
+  providers: [FarmerApplicationService, UserService],
   controllers: [FarmerApplicationController],
 })
 export class FarmerApplicationModule {}

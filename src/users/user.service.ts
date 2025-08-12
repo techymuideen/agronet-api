@@ -52,14 +52,14 @@ export class UserService {
     }
   }
 
-  findAll(paginationQuery: PaginationQueryDto) {
+  findAll(paginationQuery: PaginationQueryDto = {}) {
     const { limit, offset } = paginationQuery;
     const query = this.userModel.find();
 
-    if (limit) {
+    if (limit && limit > 0) {
       query.limit(limit);
     }
-    if (offset) {
+    if (offset != null && offset >= 0) {
       query.skip(offset);
     }
     return query.exec();
@@ -80,22 +80,13 @@ export class UserService {
     return !!user;
   }
 
-  async updateUserRole(
-    userId: string,
-    role: 'buyer' | 'farmer' | 'admin',
-  ): Promise<User> {
-    const updatedUser = await this.userModel
-      .findByIdAndUpdate(userId, { role }, { new: true })
-      .exec();
-
-    if (!updatedUser) {
-      throw new Error('User not found');
-    }
-
-    return updatedUser;
-  }
-
-  async findById(userId: string): Promise<User | null> {
-    return this.userModel.findById(userId).exec();
+  async updateUser(
+    id: string,
+    updateData: Partial<{
+      role: 'buyer' | 'farmer' | 'admin';
+      farmerApplicationStatus: 'pending' | 'approved' | 'rejected';
+    }>,
+  ) {
+    return this.userModel.findByIdAndUpdate(id, updateData, { new: true });
   }
 }
