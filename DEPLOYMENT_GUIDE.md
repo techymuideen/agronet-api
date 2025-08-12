@@ -66,14 +66,6 @@
 
 In the "Environment" section, add these environment variables:
 
-**Required Variables:**
-
-```
-NODE_ENV=production
-PORT=10000
-MONGODB_URI=mongodb+srv://techymuideen:eNGrh3qYg0XXL9C1@cluster0.zwdfi.mongodb.net/agronet?retryWrites=true&w=majority
-JWT_SECRET=your-super-secure-production-jwt-secret-key-change-this-to-something-random
-```
 
 **Optional Variables:**
 
@@ -175,7 +167,6 @@ CORS_ORIGINS=https://your-frontend-domain.com,https://www.your-frontend-domain.c
 # Required for all environments
 NODE_ENV=production
 PORT=10000
-MONGODB_URI=mongodb+srv://techymuideen:eNGrh3qYg0XXL9C1@cluster0.zwdfi.mongodb.net/agronet?retryWrites=true&w=majority
 
 # Security (CRITICAL - change in production)
 JWT_SECRET=your-super-secure-production-jwt-secret-key
