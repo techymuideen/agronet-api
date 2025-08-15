@@ -4,6 +4,8 @@ import { Model } from 'mongoose';
 import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import cloudinary from '../common/cloudinary.config';
+import * as streamifier from 'streamifier';
 
 @Injectable()
 export class ProductService {
@@ -26,6 +28,45 @@ export class ProductService {
 
   async create(createProductDto: CreateProductDto) {
     const product = await this.productModel.create(createProductDto);
+    return product;
+  }
+
+  async createWithImage(createProductDto: CreateProductDto, file?: any) {
+    const images: string[] = Array.isArray(createProductDto.images)
+      ? [...createProductDto.images]
+      : [];
+
+    if (file && (file as any).buffer) {
+      try {
+        const uploadResult: any = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: 'agronet/products' },
+            (error: any, result: any) => {
+              if (error) return reject(error);
+              resolve(result);
+            },
+          );
+          streamifier.createReadStream((file as any).buffer).pipe(uploadStream);
+        });
+
+        if (uploadResult && typeof uploadResult.secure_url === 'string') {
+          images.push(uploadResult.secure_url);
+        }
+      } catch (err) {
+        console.warn(
+          'Cloudinary upload warning - upload failed, continuing product create:',
+          err,
+        );
+        // continue without failing product creation
+      }
+    }
+
+    const payload = {
+      ...createProductDto,
+      images,
+    };
+
+    const product = await this.productModel.create(payload);
     return product;
   }
 

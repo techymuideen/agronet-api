@@ -65,6 +65,14 @@ export class UserService {
     return query.exec();
   }
 
+  async findOne(id: string) {
+    const user = await this.userModel.findById(id).exec();
+    if (!user) {
+      throw new ConflictException(`User with the id ${id} not found`);
+    }
+    return user;
+  }
+
   async findByEmail(email: string) {
     const normalizedEmail = email.toLowerCase().trim();
     return this.userModel.findOne({

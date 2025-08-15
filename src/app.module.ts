@@ -11,6 +11,7 @@ import { OrderModule } from './order/order.module';
 import { MessageModule } from './message/message.module';
 import { AdminModule } from './admin/admin.module';
 import { GeolocationModule } from './geolocation/geolocation.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { GeolocationModule } from './geolocation/geolocation.module';
     MessageModule,
     AdminModule,
     GeolocationModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],

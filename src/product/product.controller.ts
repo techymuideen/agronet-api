@@ -6,7 +6,12 @@ import {
   Param,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductService } from './product.service';
 
@@ -15,8 +20,71 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
-  createProduct(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  @UseInterceptors(
+    FileInterceptor('image', {
+      limits: {
+        fileSize: parseInt(
+          process.env.MAX_FILE_SIZE_BYTES || String(5 * 1024 * 1024),
+          10,
+        ),
+      },
+      fileFilter: (req, file, cb) => {
+        // accept only image mime types
+        if (!file.mimetype.startsWith('image/')) {
+          return cb(new Error('Only image uploads are allowed'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  @HttpCode(HttpStatus.CREATED)
+  async createProduct(@Body() body: any, @UploadedFile() file: any) {
+    // Log incoming fields and file summary to help debug payload issues
+    console.log('POST /product received form fields:', Object.keys(body));
+    console.log('Form field sample:', body);
+    if (file) {
+      console.log('Received file:', {
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size || (file.buffer && file.buffer.length),
+      });
+    }
+
+    // Parse and normalize fields coming from multipart/form-data (all strings)
+    const parsedLocation = (() => {
+      try {
+        if (!body.location) return { type: 'Point', coordinates: [0, 0] };
+        if (typeof body.location === 'string') return JSON.parse(body.location);
+        return body.location;
+      } catch (err) {
+        console.warn('Failed to parse location field, using default:', err);
+        return { type: 'Point', coordinates: [0, 0] };
+      }
+    })();
+
+    const createProductDto: CreateProductDto = {
+      farmerId: body.farmerId,
+      name: body.name,
+      description: body.description,
+      price: body.price ? Number(body.price) : 0,
+      quantity: body.quantity ? Number(body.quantity) : 0,
+      images: [],
+      location: parsedLocation,
+    } as CreateProductDto;
+
+    try {
+      const product = await this.productService.createWithImage(
+        createProductDto,
+        file,
+      );
+      return { success: true, data: product };
+    } catch (err: any) {
+      console.error('Failed to create product:', err);
+      return {
+        success: false,
+        error: err?.message || 'Failed to create product',
+      };
+    }
   }
 
   @Get()

@@ -26,17 +26,50 @@ export class MessageController {
   // Thread endpoints
   @Post('thread')
   async createThread(@Body() createThreadDto: CreateThreadDto) {
-    return this.messageService.createThread(createThreadDto);
+    try {
+      const thread = await this.messageService.createThread(createThreadDto);
+      return {
+        success: true,
+        data: thread,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Failed to create thread',
+      };
+    }
   }
 
   @Get('threads')
   async getMyThreads(@Request() req) {
-    return this.messageService.findThreadsByUser(req.user.userId);
+    try {
+      const threads = await this.messageService.findThreadsByUser(req.user.userId);
+      return {
+        success: true,
+        data: threads,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Failed to fetch threads',
+      };
+    }
   }
 
   @Get('thread/:id')
   async getThread(@Param('id') id: string) {
-    return this.messageService.findThreadById(id);
+    try {
+      const thread = await this.messageService.findThreadById(id);
+      return {
+        success: true,
+        data: thread,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Thread not found',
+      };
+    }
   }
 
   @Get('thread/:id/messages')

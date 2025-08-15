@@ -1,10 +1,20 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
+import * as express from 'express';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Increase default body size limits so multipart/form-data and larger JSON bodies don't return 413
+  app.use(express.json({ limit: process.env.REQUEST_JSON_LIMIT || '10mb' }));
+  app.use(
+    express.urlencoded({
+      limit: process.env.REQUEST_URLENCODED_LIMIT || '10mb',
+      extended: true,
+    }),
+  );
 
   // Enable CORS for frontend connection
   const corsOrigins = process.env.CORS_ORIGINS

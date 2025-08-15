@@ -32,32 +32,31 @@ export class MessageService {
   async createThread(
     createThreadDto: CreateThreadDto,
   ): Promise<MessageThreadDocument> {
-    // Check if thread already exists between these users
-    const existingThread = await this.messageThreadModel.findOne({
-      $or: [
-        {
-          buyerId: createThreadDto.buyerId,
-          farmerId: createThreadDto.farmerId,
+    // Create a sorted participants array (string ids) to enforce uniqueness
+    const ids = [createThreadDto.buyerId, createThreadDto.farmerId].map((id) =>
+      String(id),
+    );
+    ids.sort();
+
+    // Use findOneAndUpdate with upsert to atomically find-or-create the thread
+    const participants = ids.map((id) => new Types.ObjectId(id));
+
+    const now = new Date();
+
+    const thread = await this.messageThreadModel.findOneAndUpdate(
+      { participants },
+      {
+        $setOnInsert: {
+          buyerId: new Types.ObjectId(createThreadDto.buyerId),
+          farmerId: new Types.ObjectId(createThreadDto.farmerId),
+          participants,
+          lastMessageAt: now,
         },
-        {
-          buyerId: createThreadDto.farmerId,
-          farmerId: createThreadDto.buyerId,
-        },
-      ],
-    });
+      },
+      { new: true, upsert: true },
+    );
 
-    if (existingThread) {
-      return existingThread;
-    }
-
-    const thread = new this.messageThreadModel({
-      buyerId: new Types.ObjectId(createThreadDto.buyerId),
-      farmerId: new Types.ObjectId(createThreadDto.farmerId),
-      lastMessageAt: new Date(),
-    });
-
-    const savedThread = await thread.save();
-    return savedThread;
+    return thread;
   }
 
   async findThreadsByUser(userId: string): Promise<MessageThread[]> {
@@ -71,6 +70,19 @@ export class MessageService {
       .populate('buyerId', 'fullName email role')
       .populate('farmerId', 'fullName email role')
       .sort({ lastMessageAt: -1 })
+      .exec();
+  }
+
+  async findThreadByParticipants(
+    buyerId: string,
+    farmerId: string,
+  ): Promise<MessageThread | null> {
+    const ids = [buyerId, farmerId].map((id) => String(id)).sort();
+    const participants = ids.map((id) => new Types.ObjectId(id));
+    return this.messageThreadModel
+      .findOne({ participants })
+      .populate('buyerId', 'fullName email role')
+      .populate('farmerId', 'fullName email role')
       .exec();
   }
 
