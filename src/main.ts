@@ -19,7 +19,11 @@ async function bootstrap() {
   // Enable CORS for frontend connection
   const corsOrigins = process.env.CORS_ORIGINS
     ? process.env.CORS_ORIGINS.split(',')
-    : ['http://localhost:3001', 'http://localhost:3000']; // Frontend ports
+    : [
+        'http://localhost:3001',
+        'http://localhost:3000',
+        'https://agronetapp.netlify.app/',
+      ]; // Frontend ports
 
   app.enableCors({
     origin: corsOrigins,
@@ -40,7 +44,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3001;
   await app.listen(port);
-  console.log(`AgroNet API is running on: http://localhost:${port}`);
+  console.log(`AgroNet API is running on ${port}`);
 }
 
 bootstrap().catch((error) => {
